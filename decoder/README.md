@@ -1,8 +1,10 @@
 # Survarium options decoder tool
 
-Convert .options to .json
+Convert `.options` to `.json`
 
-See `node decoder --help`
+Deps: `npm run deps`
 
-[Desciption](./INFO.md)
-[Forum](https://forum.survarium.com/en/viewtopic.php?f=3&t=7475&p=253180)
+Usage: `node decoder --help`
+
+[Format](./FORMAT.md)  
+[Forum](https://forum.survarium.com/en/viewtopic.php?f=3&t=7475&start=200)

@@ -1,19 +1,21 @@
- starting offset is 0x508
+# Options data map
+ 
+starting offset is 0x508
 
- ---
- each entry is 24 bytes long, the last 4 bytes (entry+20) points to an offset in the file with its proper string. entry+12 contains the entry value
+---
+each entry is 24 bytes long, the last 4 bytes (entry+20) points to an offset in the file with its proper string. entry+12 contains the entry value
 
- ---
+---
 
- entries with value type 3/4 means the variable 'value' contains an id of another entry. this other entry will have a string (and probably sub-entries) if 'value type' was 3, or no string if it was 4
+entries with value type 3/4 means the variable 'value' contains an id of another entry. this other entry will have a string (and probably sub-entries) if 'value type' was 3, or no string if it was 4
 
- ---
+---
 
- suggestion for your tool: since entries with type 4 points to sub-entries without strings, how about you give those sub-entries the same string than the initial entry plus a number suffix? eg:
-- weapon_affinities
-+- weapon_affinities0
-+- weapon_affinities1
-+- weapon_affinities2
+suggestion for your tool: since entries with type 4 points to sub-entries without strings, how about you give those sub-entries the same string than the initial entry plus a number suffix? eg:
+- weapon_affinities  
++- weapon_affinities0  
++- weapon_affinities1  
++- weapon_affinities2  
 
 ---
 

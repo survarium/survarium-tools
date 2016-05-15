@@ -5,18 +5,18 @@ function parse(buffer, options) {
 		return entry.readUInt32LE(0);
 	}
 
-	const entryLength = getLength(buffer);
-	const entrySizeOffset = entryLength - 2;
-	const entryTypeOffset = entryLength - 4;
-	const entryNameOffset = 8;
-	const entryValueOffset = 0;
+	const ENTRY_LENGTH       = getLength(buffer);
+	const ENTRY_OFFSET_SIZE  = ENTRY_LENGTH - 2;
+	const ENTRY_OFFSET_TYPE  = ENTRY_LENGTH - 4;
+	const ENTRY_OFFSET_NAME  = 8;
+	const ENTRY_OFFSET_VALUE = 0;
 
 	function correct(entry) {
-		return entry && entry.length === entryLength;
+		return entry && entry.length === ENTRY_LENGTH;
 	}
 
 	function getEntry(offset) {
-		let entry = buffer.slice(offset, offset + entryLength);
+		let entry = buffer.slice(offset, offset + ENTRY_LENGTH);
 		if (!correct(entry)) {
 			return;
 		}
@@ -25,11 +25,11 @@ function parse(buffer, options) {
 	}
 
 	function getSize(entry) {
-		return entry.readUInt16LE(entrySizeOffset);
+		return entry.readUInt16LE(ENTRY_OFFSET_SIZE);
 	}
 
 	function getType(entry) {
-		return entry.readUInt16LE(entryTypeOffset);
+		return entry.readUInt16LE(ENTRY_OFFSET_TYPE);
 	}
 
 	function getString(offset, size) {
@@ -37,7 +37,7 @@ function parse(buffer, options) {
 	}
 
 	function getNameOffset(entry) {
-		return entry.readUInt32LE(entryNameOffset);
+		return entry.readUInt32LE(ENTRY_OFFSET_NAME);
 	}
 
 	function getName(entry, parent) {
@@ -51,31 +51,31 @@ function parse(buffer, options) {
 	}
 
 	function getValueInt(entry) {
-		return entry.readUInt32LE(entryValueOffset);
+		return entry.readUInt32LE(ENTRY_OFFSET_VALUE);
 	}
 
 	function getValueFloat(entry) {
-		return Math.round(entry.readFloatLE(entryValueOffset) * 100) / 100;
+		return Math.round(entry.readFloatLE(ENTRY_OFFSET_VALUE) * 100) / 100;
 	}
 
 	function getValueString(entry, size) {
-		return getString(entry.readUInt16LE(entryValueOffset), size);
+		return getString(entry.readUInt16LE(ENTRY_OFFSET_VALUE), size);
 	}
 
 	function getValueBool(entry) {
-		return !!entry.readUInt16LE(entryValueOffset);
+		return !!entry.readUInt16LE(ENTRY_OFFSET_VALUE);
 	}
 
-	function getNext(entry) {
+	function getChild(entry) {
 		return getEntry(getValueInt(entry));
 	}
 
 	function stringifyBuffer(entry) {
 		let result = entry.toString('hex').toUpperCase();
 		let length = result.length;
-		let out = '';
+		let out    = '';
 		for (let i = 0, j = 2; i < length; i += j) {
-			out += (i ? '-' : '') + result.substr(i, j)
+			out += (i ? '-' : '') + result.substr(i, j);
 		}
 		return out;
 	}
@@ -93,46 +93,47 @@ function parse(buffer, options) {
 
 		let decoded = {
 			size: getSize(entry),
-			name: getName(entry, parent),
+			name: getName(entry, parent)
 		};
 
 		options.debug && (decoded.buffer = stringifyBuffer(entry));
 
 		switch (type) {
 			case 0:
-				type = 'bool';
+				type          = 'bool';
 				decoded.value = getValueBool(entry);
 				break;
 			case 1:
-				type = 'int';
+				type          = 'int';
 				decoded.value = getValueInt(entry);
 				break;
 			case 2:
-				type = 'float';
+				type          = 'float';
 				decoded.value = getValueFloat(entry);
 				break;
 			case 3:
 			case 4:
-				let safe = 0;
+				let safe      = decoded.size - 1;
 				let __pointer = pointer;
 
-				decoded.value = [];
-				pointer = decoded.value;
-				let innerOffset = getNext(entry).__offset;
+				decoded.value   = [];
+				pointer         = decoded.value;
+				let innerOffset = getChild(entry).__offset;
 
 				do {
 					let child = getEntry(innerOffset);
 					decode(child, decoded);
-					innerOffset += entryLength;
-				} while (++safe < decoded.size && decoded.value.length < decoded.size);
+					innerOffset += ENTRY_LENGTH;
+				} while (safe-- && decoded.value.length < decoded.size);
 
 				pointer = __pointer;
 				break;
 			case 5:
-				type = 'string';
+				type          = 'string';
 				decoded.value = getValueString(entry, decoded.size);
 				break;
-			default: return;
+			default:
+				return;
 		}
 
 		decoded.type = type;
