@@ -1,0 +1,14 @@
+{
+  "name": "survaium-tools",
+  "version": "0.0.0",
+  "description": "Survarium game resource tools",
+  "main": "index.js",
+  "scripts": {
+    "deps": "npm i && (cd decoder && npm i)"
+  },
+  "author": "Dmitry Vasilyev <vaseker@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "git": "git@github.com:survarium/survarium-tools.git"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@survaium-tools/decoder",
+  "version": "0.0.0",
+  "description": "Options files decoder",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Dmitry Vasilyev <vaseker@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "^7.0.3",
+    "mkdirp": "^0.5.1",
+    "yargs": "^4.7.0"
+  }
+}
