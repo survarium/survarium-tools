@@ -33,7 +33,9 @@ function parse(buffer, options) {
 	}
 
 	function getString(offset, size) {
-		return buffer.slice(offset, buffer.indexOf(0, offset, 'hex') || size).toString('utf8');
+		let stringEnd =  buffer.indexOf(0, offset, 'hex');
+		stringEnd === -1 && size && (stringEnd = size);
+		return buffer.slice(offset, stringEnd).toString('utf8');
 	}
 
 	function getNameOffset(entry) {
