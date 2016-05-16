@@ -38,9 +38,12 @@ function parse(file, dst, options) {
 			throw err;
 		}
 
-		file.body = parser(buffer, options);
-
-		return save(dst, file);
+		try {
+			file.body = parser(buffer, options);
+			save(dst, file);
+		} catch (err) {
+			console.error(`Error while parsing ${file.path}`, err);
+		}
 	});
 }
 

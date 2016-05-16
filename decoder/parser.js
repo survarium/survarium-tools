@@ -1,5 +1,7 @@
 'use strict';
 
+const ENDIANNESS = require('os').endianness();
+
 function parse(buffer, options) {
 	function getLength(entry) {
 		return entry.readUInt32LE(0);
@@ -25,11 +27,11 @@ function parse(buffer, options) {
 	}
 
 	function getSize(entry) {
-		return entry.readUInt16LE(ENTRY_OFFSET_SIZE);
+		return entry[`readUInt16${ENDIANNESS}`](ENTRY_OFFSET_SIZE);
 	}
 
 	function getType(entry) {
-		return entry.readUInt16LE(ENTRY_OFFSET_TYPE);
+		return entry[`readUInt16${ENDIANNESS}`](ENTRY_OFFSET_TYPE);
 	}
 
 	function getString(offset, size) {
@@ -39,7 +41,7 @@ function parse(buffer, options) {
 	}
 
 	function getNameOffset(entry) {
-		return entry.readUInt32LE(ENTRY_OFFSET_NAME);
+		return entry[`readUInt32${ENDIANNESS}`](ENTRY_OFFSET_NAME);
 	}
 
 	function getName(entry, parent) {
@@ -53,23 +55,36 @@ function parse(buffer, options) {
 	}
 
 	function getValueInt(entry) {
-		return entry.readUInt32LE(ENTRY_OFFSET_VALUE);
+		return entry[`readInt32${ENDIANNESS}`](ENTRY_OFFSET_VALUE);
 	}
 
-	function getValueFloat(entry) {
-		return Math.round(entry.readFloatLE(ENTRY_OFFSET_VALUE) * 100) / 100;
+	function getValueFloat(entry, shift) {
+		let offset = ENTRY_OFFSET_VALUE;
+		shift && (offset += shift);
+		return Math.round(entry[`readFloat${ENDIANNESS}`](offset) * 10000) / 10000;
 	}
 
 	function getValueString(entry, size) {
-		return getString(entry.readUInt32LE(ENTRY_OFFSET_VALUE), size);
+		return getString(entry[`readUInt32${ENDIANNESS}`](ENTRY_OFFSET_VALUE), size);
 	}
 
 	function getValueBool(entry) {
-		return !!entry.readUInt16LE(ENTRY_OFFSET_VALUE);
+		return !!entry[`readInt32${ENDIANNESS}`](ENTRY_OFFSET_VALUE);
 	}
 
 	function getChild(entry) {
 		return getEntry(getValueInt(entry));
+	}
+
+	function getArray(entry) {
+		let offset = getValueInt(entry);
+		let value = buffer.slice(offset, offset + ENTRY_LENGTH);
+		let array = [];
+		let size = getSize(entry);
+		for (var i = 0; i < size; i += 4) {
+			array.push(getValueFloat(value, i));
+		}
+		return array;
 	}
 
 	function stringifyBuffer(entry) {
@@ -134,8 +149,16 @@ function parse(buffer, options) {
 				type          = 'string';
 				decoded.value = getValueString(entry, decoded.size);
 				break;
+			case 6:
+			case 7:
+			case 8:
+				decoded.size = type - 4;
+				type = `arr`;
+				decoded.value = getArray(entry);
+				break;
 			default:
-				return;
+				decoded.value = 'UNKNOWN';
+				break;
 		}
 
 		decoded.type = type;
