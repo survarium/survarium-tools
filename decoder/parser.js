@@ -59,7 +59,7 @@ function parse(buffer, options) {
 	}
 
 	function getValueString(entry, size) {
-		return getString(entry.readUInt16LE(ENTRY_OFFSET_VALUE), size);
+		return getString(entry.readUInt32LE(ENTRY_OFFSET_VALUE), size);
 	}
 
 	function getValueBool(entry) {
