@@ -48,7 +48,10 @@ function parse(buffer, options) {
 		let name = getString(getNameOffset(entry));
 
 		if (name === '\u0018') {
-			name = parent ? `${parent.name}_${parent.value.length}` : 'root';
+			name = parent ?
+				options.longNames ? `${parent.name}_${parent.value.length}` :
+					parent.value.length :
+				'root';
 		}
 
 		return name;
@@ -143,6 +146,13 @@ function parse(buffer, options) {
 					innerOffset += ENTRY_LENGTH;
 				} while (safe-- && decoded.value.length < decoded.size);
 
+				if (!options.full) {
+					decoded.value = decoded.value.reduce((hash, elem) => {
+						hash[elem.name] = elem.value;
+						return hash;
+					}, type === 3 ? {} : []);
+				}
+
 				pointer = __pointer;
 				break;
 			case 5:
@@ -163,7 +173,11 @@ function parse(buffer, options) {
 
 		decoded.type = type;
 
-		if (!options.debug && options.format && options.format.length) {
+		if (!options.debug && !options.full) {
+			decoded = { name: decoded.name, value: decoded.value };
+		}
+
+		if (!options.debug && options.full && options.format && options.format.length) {
 			decoded = options.format.reduce((formatted, field) => {
 				formatted[field] = decoded[field];
 				return formatted;
@@ -175,7 +189,7 @@ function parse(buffer, options) {
 
 	decode(getEntry(0));
 
-	return result;
+	return (!options.debug && !options.full) ? result[0].value : result;
 }
 
 module.exports = parse;

@@ -27,8 +27,16 @@ const yargs  = require('yargs')
 			type    : 'boolean'
 		},
 		format: {
-			describe: 'List of output fields. (name value type size)',
+			describe: 'List of output fields using "--full" output (name value type size)',
 			type    : 'array'
+		},
+		full: {
+			describe: 'Return values with technical info',
+			type    : 'boolean'
+		},
+		longNames: {
+			describe: 'Build long names for indexed entries using parent name as prefix',
+			type    : 'boolean'
 		}
 	})
 	.help('help');
@@ -41,7 +49,7 @@ function parse(file, dst, options) {
 		if (err) {
 			throw err;
 		}
-		
+
 		try {
 			file.body = parser(buffer, options);
 			save(dst, file);
@@ -56,7 +64,7 @@ function save(dst, file) {
 		if (err) {
 			throw err;
 		}
-		
+
 		return fs.writeFile(path.join(dst, `${file.name}.json`), JSON.stringify(file.body, null, 4), err => {
 			if (err) {
 				throw err;
@@ -68,12 +76,14 @@ function save(dst, file) {
 (yargs => {
 	let argv = yargs.argv;
 	let dst  = argv.dst;
-	
+
 	let options = {
 		debug : argv.debug,
-		format: argv.format
+		format: argv.format,
+		full  : argv.full,
+		longNames: argv.longNames
 	};
-	
+
 	let input;
 	if (input = argv.file) {
 		let file  = path.parse(input);
@@ -94,7 +104,7 @@ function save(dst, file) {
 				return parse(file, to, options);
 			});
 		});
-		
+
 	} else {
 		return console.error(`Error: no valid sources provided. Run with --help.`);
 	}
