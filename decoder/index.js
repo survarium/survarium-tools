@@ -25,6 +25,10 @@ const yargs  = require('yargs')
 		debug : {
 			describe: 'Debug mode: add source HEX to output, etc',
 			type    : 'boolean'
+		},
+		format: {
+			describe: 'List of output fields. (name value type size)',
+			type    : 'array'
 		}
 	})
 	.help('help');
@@ -37,7 +41,7 @@ function parse(file, dst, options) {
 		if (err) {
 			throw err;
 		}
-
+		
 		try {
 			file.body = parser(buffer, options);
 			save(dst, file);
@@ -47,12 +51,12 @@ function parse(file, dst, options) {
 	});
 }
 
-function save (dst, file) {
+function save(dst, file) {
 	mkdirp(dst, err => {
 		if (err) {
 			throw err;
 		}
-
+		
 		return fs.writeFile(path.join(dst, `${file.name}.json`), JSON.stringify(file.body, null, 4), err => {
 			if (err) {
 				throw err;
@@ -64,14 +68,15 @@ function save (dst, file) {
 (yargs => {
 	let argv = yargs.argv;
 	let dst  = argv.dst;
-
+	
 	let options = {
-		debug: argv.debug
+		debug : argv.debug,
+		format: argv.format
 	};
-
+	
 	let input;
 	if (input = argv.file) {
-		let file = path.parse(input);
+		let file  = path.parse(input);
 		file.path = input;
 		return parse(file, dst, options);
 	} else if (argv.folder) {
@@ -82,14 +87,14 @@ function save (dst, file) {
 				throw err;
 			}
 			files.forEach(filePath => {
-				let file = path.parse(filePath);
-				let to = filePath.split(folder);
-				to = to[1] ? path.join(dst, to[1].split(file.base)[0]) : dst;
+				let file  = path.parse(filePath);
+				let to    = filePath.split(folder);
+				to        = to[1] ? path.join(dst, to[1].split(file.base)[0]) : dst;
 				file.path = filePath;
 				return parse(file, to, options);
 			});
 		});
-
+		
 	} else {
 		return console.error(`Error: no valid sources provided. Run with --help.`);
 	}

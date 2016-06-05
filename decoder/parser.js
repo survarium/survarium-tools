@@ -163,6 +163,13 @@ function parse(buffer, options) {
 
 		decoded.type = type;
 
+		if (!options.debug && options.format && options.format.length) {
+			decoded = options.format.reduce((formatted, field) => {
+				formatted[field] = decoded[field];
+				return formatted;
+			}, {});
+		}
+
 		return pointer.push(decoded);
 	}
 
