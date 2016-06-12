@@ -1,7 +1,7 @@
 {
-  "name": "@survaium-tools/decoder",
+  "name": "@survaium-tools/skills",
   "version": "0.0.1",
-  "description": "Options files decoder",
+  "description": "Skills aggregator",
   "main": "index.js",
   "scripts": {},
   "author": "Dmitry Vasilyev <vaseker@gmail.com>",

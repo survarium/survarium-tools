@@ -4,11 +4,16 @@
   "description": "Survarium game resource tools",
   "main": "index.js",
   "scripts": {
-    "deps": "npm i && (cd decoder && npm i)"
+    "deps": "npm i"
   },
   "author": "Dmitry Vasilyev <vaseker@gmail.com>",
   "license": "MIT",
   "repository": {
     "git": "git@github.com:survarium/survarium-tools.git"
+  },
+  "dependencies": {
+    "glob": "^7.0.3",
+    "mkdirp": "^0.5.1",
+    "yargs": "^4.7.0"
   }
 }
