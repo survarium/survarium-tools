@@ -92,13 +92,16 @@ function save(dst, file) {
 	} else if (argv.folder) {
 		let folder = argv.folder;
 		input      = path.join(folder, '**', '*.options');
+
+		let uniFolder = folder.replace(/\\/g, '/');
+
 		glob(input, (err, files) => {
 			if (err) {
 				throw err;
 			}
 			files.forEach(filePath => {
 				let file  = path.parse(filePath);
-				let to    = filePath.split(folder);
+				let to    = filePath.split(uniFolder);
 				to        = to[1] ? path.join(dst, to[1].split(file.base)[0]) : dst;
 				file.path = filePath;
 				return parse(file, to, options);
