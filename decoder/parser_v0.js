@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Survarium options files parser after version 0.45
+ * Survarium options files parser before version 0.46
  */
 
 const ENDIANNESS = require('os').endianness();
@@ -12,8 +12,8 @@ function parse(buffer, options) {
 	}
 
 	const ENTRY_LENGTH       = getLength(buffer);
-	const ENTRY_OFFSET_SIZE  = 6;
-	const ENTRY_OFFSET_TYPE  = 5;
+	const ENTRY_OFFSET_SIZE  = ENTRY_LENGTH - 2;
+	const ENTRY_OFFSET_TYPE  = ENTRY_LENGTH - 4;
 	const ENTRY_OFFSET_NAME  = 8;
 	const ENTRY_OFFSET_VALUE = 0;
 
@@ -35,7 +35,7 @@ function parse(buffer, options) {
 	}
 
 	function getType(entry) {
-		return Number(entry.slice(ENTRY_OFFSET_TYPE, ENTRY_OFFSET_TYPE + 1).toString('hex')[0]);
+		return entry[`readUInt16${ENDIANNESS}`](ENTRY_OFFSET_TYPE);
 	}
 
 	function getString(offset, size) {
@@ -51,7 +51,7 @@ function parse(buffer, options) {
 	function getName(entry, parent) {
 		let name = getString(getNameOffset(entry));
 
-		if (name === '\u0010') {
+		if (name === '\u0018') {
 			name = parent ?
 				options.longNames ? `${parent.name}_${parent.value.length}` :
 					parent.value.length :
@@ -88,7 +88,7 @@ function parse(buffer, options) {
 		let value = buffer.slice(offset, offset + ENTRY_LENGTH);
 		let array = [];
 		let size = getSize(entry);
-		for (let i = 0; i < size; i += 4) {
+		for (var i = 0; i < size; i += 4) {
 			array.push(getValueFloat(value, i));
 		}
 		return array;

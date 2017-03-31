@@ -1,6 +1,6 @@
 {
   "name": "survaium-tools",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Survarium game resource tools",
   "main": "index.js",
   "scripts": {

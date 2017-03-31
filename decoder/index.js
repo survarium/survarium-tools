@@ -37,11 +37,15 @@ const yargs  = require('yargs')
 		longNames: {
 			describe: 'Build long names for indexed entries using parent name as prefix',
 			type    : 'boolean'
-		}
+		},
+        v: {
+		    describe: 'Parser version (0 for parse options before 0.46)',
+            type    : 'number'
+        }
 	})
 	.help('help');
 
-const parser = require('./parser');
+let parser;
 
 function parse(file, dst, options) {
 	options.debug && (console.log(`processing ${file.base}`));
@@ -83,6 +87,10 @@ function save(dst, file) {
 		full  : argv.full,
 		longNames: argv.longNames
 	};
+
+	let version = argv.v;
+
+	parser = require(`./parser${version !== undefined ? '_v' + version : ''}`);
 
 	let input;
 	if (input = argv.file) {
